@@ -1,0 +1,46 @@
+version: "2.0"
+services:
+  # MySQL - Based on the official image, with some extra configuration
+  mysqlservice:
+#    image: fantomx1/common:le...
+    build: ./mysql
+    volumes:
+      # reset volume to new one so no-sudo user can start it
+      - datavolume3:/var/lib/mysql
+      - ./docker/mysql/:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "dbName"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "123"
+    ports:
+      - 3307:3306
+  #        command: --sql_mode=""
+  memcachedservice:
+    image: memcached
+  apacheservice:
+    # build: ./docker/apache_php
+    build: ./apachePhpFpm
+    #        other usages
+    #        build: ./l/docker/apache_php
+    #        image: ed63d297a051
+    #        image: 61e0bd47b299
+    #        image: apache_multiple_fpm
+
+    #          - memcachedservice
+    user: '10010'
+    volumes:
+      - ../:/var/www/html
+      - historyvolume2:/root/.bash_history
+      - /root/.composer/cache:/root/.composer/cache
+    environment:
+      ALLOW_OVERRIDE: "true"
+    ports:
+      - 8000:8080
+      - '9022:22'
+    #      command: bash -c 'php yii migrate --interactive=false & composer install --profile --verbose & service memcached restart & (echo "ServerName localhost" >> /etc/apache2/apache2.conf && apache2ctl -k restart -D FOREGROUND || tail -f /dev/null)'
+    command:  bash -c ' service php5.6-fpm restart &  service php7.0-fpm restart &  service php7.2-fpm restart & apache2ctl -k restart  -D FOREGROUND & tail -f /dev/null'
+
+volumes:
+  datavolume3:
+  historyvolume2:
