@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: efse-test-succ
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: efse-test-succ
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efse-files-vol-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: efse-test-succ
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: efse-test-succ
+    spec:
+      strategy:
+        - type: RollingUpdate
+      containers:
+        - name: efse-test-succ
+          image: IMAGE_VARIABLE_1
+          env:
+            - name: EFSE_SECRET_FTP_USER
+              valueFrom:
+                secretKeyRef:
+                  key: EFSE_SECRET_FTP_USER
+                  name: efse-secret-ftp-user
+            - name: EFSE_SECRET_FTP_PW
+              valueFrom:
+                secretKeyRef:
+                  key: EFSE_SECRET_FTP_PW
+                  name: efse-secret-ftp-pw
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          protocol: TCP
+          volumeMounts:
+            - mountPath: /var/www/html/efse/files
+              name: efse-files-vol
+
+      volumes:
+        - name: efse-files-vol
+          persistentVolumeClaim:
+            claimName: efse-files-vol-claim
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: efse-secret-ftp-pw
+stringData:
+  EFSE_SECRET_FTP_PW: ToBeAdded
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: efse-secret-ftp-user
+stringData:
+  EFSE_SECRET_FTP_USER: ToBeAdded
+---
+apiVersion: v1
+kind: Route
+metadata:
+  name: efse-test-succ
+spec:
+  host: efse-test-succ.sit.domain.com
+  to:
+    kind: Service
+    name: efse-test-succ
