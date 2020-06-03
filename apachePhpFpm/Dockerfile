@@ -124,7 +124,9 @@ RUN apt install make -y
 
 RUN  apt update && apt install php7.2-soap   php7.1-soap php7.0-soap php5.6-soap -y
 
-RUN  apt-get update && apt-get install -y libmemcached11 libmemcachedutil2 build-essential libmemcached-dev libz-dev memcached
+RUN  apt-get update && apt-get install -y libmemcached11 libmemcachedutil2 build-essential libmemcached-dev libz-dev memcached \
+&& apt install php7.2-intl   php7.1-intl php7.0-intl php5.6-intl -y
+
 #RUN  pecl install memcached-3.0.4
 #apt-get install php-pear
 
@@ -201,14 +203,27 @@ RUN chmod 0777 /etc/group
 
 RUN chmod -R 0777 /etc/php
 
-RUN chmod -R 0777 /var/log/apache2
-RUN chmod -R 0777 /var/log/
-RUN chmod -R 0777 /var/lock/apache2
-RUN chmod -R 0777 /var/run/apache2
-RUN chmod -R 0777 /var/run/
-RUN chmod -R 0777 /etc/init.d
-RUN chmod -R a+x /var/run/
-RUN chmod -R a+x /run
+#RUN chmod -R 0777 /var/log/apache2
+#RUN chmod -R 0777 /var/log/
+#RUN chmod -R 0777 /var/lock/apache2
+#RUN chmod -R 0777 /var/run/apache2
+#RUN chmod -R 0777 /var/run/
+#RUN chmod -R 0777 /etc/init.d
+#RUN chmod -R a+x /var/run/
+#RUN chmod -R a+x /run
+
+
+RUN chmod -R 0777 /var/log/apache2 &&\
+ chmod -R 0777 /var/log/ &&\
+ chmod -R 0777 /var/lock/apache2 &&\
+ chmod -R 0777 /var/run/apache2 &&\
+ chmod -R 0777 /var/run/ &&\
+ chmod -R 0777 /etc/init.d &&\
+ chmod -R a+x /var/run/ &&\
+ chmod -R a+x /run
+
+
+RUN chmod -R 0777 /var/log/apache2 && chmod -R 0777 /var/log/ && chmod -R 0777 /var/lock/apache2 && chmod -R 0777 /var/run/apache2 && chmod -R 0777 /var/run/ && chmod -R 0777 /etc/init.d && chmod -R a+x /var/run/ &&  chmod -R a+x /run
 
 RUN chmod -R 0777 /var/www/html
 RUN chmod -R 0777 /var/lib/apache2
@@ -242,12 +257,15 @@ xdebug.remote_connect_back=0\n\
 xdebug.remote_autostart=off\n\
 upload_max_filesize = 40M\n\
 post_max_size = 40M" | tee -a /etc/php/7.2/fpm/conf.d/20-xdebug.ini \
-/etc/php/7.1/fpm/conf.d/20-xdebug.ini \
+#/etc/php/7.1/fpm/conf.d/20-xdebug.ini \
 /etc/php/7.0/fpm/conf.d/20-xdebug.ini \
 /etc/php/5.6/fpm/conf.d/20-xdebug.ini ;
 
-RUN /sbin/ip route|awk '/default/ { print $3 }'|xargs -I{} echo "xdebug.remote_host={}"| tee -a /etc/php/7.2/fpm/conf.d/20-xdebug.ini \
-                                                         /etc/php/7.1/fpm/conf.d/20-xdebug.ini \
+#RUN /sbin/ip route|awk '/default/ { print $3 }'|xargs -I{} echo "xdebug.remote_host={}"| tee -a /etc/php/7.2/fpm/conf.d/20-xdebug.ini \
+#the ip of the host, since if run via virtualbox cli its different than website user and
+#so windows docker host alias etc might not rather work
+RUN /sbin/ip route|awk '/default/ { print $3 }'|xargs -I{} echo "xdebug.remote_host=192.168.0.109"| tee -a /etc/php/7.2/fpm/conf.d/20-xdebug.ini \
+                                                         #/etc/php/7.1/fpm/conf.d/20-xdebug.ini \
                                                          /etc/php/7.0/fpm/conf.d/20-xdebug.ini \
                                                          /etc/php/5.6/fpm/conf.d/20-xdebug.ini && \
                                                                                                cat /etc/php/7.2/fpm/conf.d/20-xdebug.ini
