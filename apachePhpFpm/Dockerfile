@@ -263,7 +263,7 @@ post_max_size = 40M" | tee -a /etc/php/7.2/fpm/conf.d/20-xdebug.ini \
 
 #RUN /sbin/ip route|awk '/default/ { print $3 }'|xargs -I{} echo "xdebug.remote_host={}"| tee -a /etc/php/7.2/fpm/conf.d/20-xdebug.ini \
 #the ip of the host, since if run via virtualbox cli its different than website user and
-#so windows docker host alias etc might not rather work
+#so windows docker host alias etc might not rather work for both virtualbox guest and host inside Docker Toolbox
 RUN /sbin/ip route|awk '/default/ { print $3 }'|xargs -I{} echo "xdebug.remote_host=192.168.0.109"| tee -a /etc/php/7.2/fpm/conf.d/20-xdebug.ini \
                                                          #/etc/php/7.1/fpm/conf.d/20-xdebug.ini \
                                                          /etc/php/7.0/fpm/conf.d/20-xdebug.ini \
